@@ -1,4 +1,11 @@
+# for picking exercises
 import random
+# for loading emails
+import csv
+# to call shell commands (to send emails)
+import os
+# to get the date
+import datetime
 
 # minimum number of minutes
 MIN_MINUTES = 7
@@ -34,7 +41,6 @@ EXERCISES = [
     [50, 'straight arm sit-ups', [30, 45, 1, 1.5]],
     [50, 'pilates 100', [30, 45, 1, 1.5]],
 ]
-
 
 def pick_exercises():
     total_time = 0
@@ -113,16 +119,52 @@ def format_email_list(exercise_list, total_mins):
 
     return formatted_list
 
+# check if there is an "email_list.csv", otherwise create one
+def load_eamils():
+    # TODO check current dir for "email_list.csv"
+
+    # TODO create a blank email_list.csv
+
+    # otherwise get the list of emails
+    with open('email_list.csv') as emailCSV:
+        csvReader = csv.reader(emailCSV)
+        # should only be one row
+        for row in csvReader:
+            emailList = row
+            return emailList
+
+# send the email using the linux os commands
+def send_email(email_list, formatted_workout):
+    # get todays date & format it
+    now = datetime.datetime.now()
+    # get the ending of the date # ('st', 'nd', 'rd' or 'th')
+    if now.strftime('%d')[-1] == "1":
+        date_end = "st"
+    elif now.strftime('%d')[-1] == "2":
+        date_end = "nd"
+    elif now.strftime('%d')[-1] == "3":
+        date_end = "rd"
+    else:
+        date_end = "th"
+    date_str = now.strftime('7MA: %A, %B %d') + date_end
+    print(date_str)
+
+    for current_email in email_list:
+        message_string = "echo " + formatted_workout + " | mutt -s " + date_str + " " + current_email
+        os.system(message_string)
+    
 
 def main():
+
+    email_list = load_eamils()
     random.seed(a=None, version=2)
 
     exercise_list_time = pick_exercises()
     exercise_list = exercise_list_time[0]
     total_time = exercise_list_time[1]
 
-    format_email_list(exercise_list, total_time)
+    formatted_list = format_email_list(exercise_list, total_time)
 
-    print(formatted_list)
+    send_email(email_list, formatted_list)
 
 main()
