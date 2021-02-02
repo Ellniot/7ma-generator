@@ -165,7 +165,6 @@ def save_email_body(formatted_workout):
 def send_emails(email_list, subject):
     for email in email_list:
         # call the sender script
-        print('cat ./' + EMAIL_BODY_FILENAME + ' | mutt -s "' + subject + '" ' + email)
         os.system('cat ./' + EMAIL_BODY_FILENAME + ' | mutt -s "' + subject + '" ' + email)
 
 
@@ -183,5 +182,6 @@ def main():
     subj = save_email_body(formatted_list)
 
     send_emails(email_list, subj)
+    return 0
 
 main()
