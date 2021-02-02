@@ -133,9 +133,10 @@ def load_eamils():
     with open('email_list.csv') as emailCSV:
         csvReader = csv.reader(emailCSV)
         # should only be one row
+        emailList = []
         for row in csvReader:
-            emailList = row
-            return emailList
+            emailList.append(row[0])
+        return emailList
 
 # save the email body to a txt file, return the date as the subject
 def save_email_body(formatted_workout):
