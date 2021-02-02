@@ -2,13 +2,17 @@
 import random
 # for loading emails
 import csv
-# to call shell commands (to send emails)
+# to call the shell email sender script
 import os
 # to get the date
 import datetime
 
 # minimum number of minutes
 MIN_MINUTES = 7
+
+# outputted email subject & body filenames
+EMAIL_SUBJECT_FILENAME = "email_subject.txt"
+EMAIL_BODY_FILENAME = "email_body.txt"
 
 # EXERCISES TO PICK FROM
 # [choice weight, 'name', [times it can be done for]]
@@ -133,10 +137,11 @@ def load_eamils():
             emailList = row
             return emailList
 
-# send the email using the linux os commands
-def send_email(email_list, formatted_workout):
+# save the email body to a txt file, return the date as the subject
+def save_email_body(formatted_workout):
     # get todays date & format it
     now = datetime.datetime.now()
+    # TODO - fix days like "02nd" -> 2nd
     # get the ending of the date # ('st', 'nd', 'rd' or 'th')
     if now.strftime('%d')[-1] == "1":
         date_end = "st"
@@ -147,12 +152,21 @@ def send_email(email_list, formatted_workout):
     else:
         date_end = "th"
     date_str = now.strftime('7MA: %A, %B %d') + date_end
-    print(date_str)
 
-    for current_email in email_list:
-        message_string = "echo " + formatted_workout + " | mutt -s " + date_str + " " + current_email
-        os.system(message_string)
-    
+    # save the email body to a file
+    email_body_file=open(EMAIL_BODY_FILENAME,'w')
+    email_body_file.write(formatted_workout)
+    email_body_file.close()
+
+    return date_str
+
+
+def send_emails(email_list, subject):
+    for email in email_list:
+        # call the sender script
+        print('cat ./' + EMAIL_BODY_FILENAME + ' | mutt -s "' + subject + '" ' + email)
+        os.system('cat ./' + EMAIL_BODY_FILENAME + ' | mutt -s "' + subject + '" ' + email)
+
 
 def main():
 
@@ -165,6 +179,8 @@ def main():
 
     formatted_list = format_email_list(exercise_list, total_time)
 
-    send_email(email_list, formatted_list)
+    subj = save_email_body(formatted_list)
+
+    send_emails(email_list, subj)
 
 main()
