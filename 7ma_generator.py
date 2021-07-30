@@ -2,7 +2,7 @@
 import random
 # for loading emails
 import csv
-# to call the shell email sender script
+# to call the shell email sender script and check for the email list file
 import os
 # to get the date
 import datetime
@@ -169,19 +169,30 @@ def send_emails(email_list, subject):
 
 
 def main():
-
-    email_list = load_eamils()
+    
+    # generate the exercises
     random.seed(a=None, version=2)
-
     exercise_list_time = pick_exercises()
+    
+    # format the exercises to look pretty
     exercise_list = exercise_list_time[0]
     total_time = exercise_list_time[1]
-
     formatted_list = format_email_list(exercise_list, total_time)
-
     subj = save_email_body(formatted_list)
 
-    send_emails(email_list, subj)
+
+    # check if there is an email list file in the folder
+    path = os.getcwd() + "\\email_list.csv"
+    if os.path.exists(path):
+        
+        # import the emails
+        email_list = load_eamils()
+
+        send_emails(email_list, subj)
+
+    else:
+        print(formatted_list)
+        
     return 0
 
 main()
