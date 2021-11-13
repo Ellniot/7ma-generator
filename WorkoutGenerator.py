@@ -1,3 +1,7 @@
+# requires gmail package to be installed
+#       pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+# TODO make this automatic / check for this
+
 # for picking exercises
 import random
 # for loading emails
@@ -6,6 +10,11 @@ import csv
 import os
 # to get the date
 import datetime
+# local py file to send the emails
+from EmailAgent import send_email 
+
+# show/hide debugger logging
+DEBUGGER = True
 
 # minimum number of minutes
 MIN_MINUTES = 7
@@ -128,6 +137,7 @@ def load_eamils():
     # TODO check current dir for "email_list.csv"
 
     # TODO create a blank email_list.csv
+        # then return null or something
 
     # otherwise get the list of emails
     with open('email_list.csv') as emailCSV:
@@ -135,11 +145,12 @@ def load_eamils():
         # should only be one row
         emailList = []
         for row in csvReader:
-            emailList.append(row[0])
+            if row[0][0] != "#":
+                emailList.append(row[0])
         return emailList
 
 # save the email body to a txt file, return the date as the subject
-def save_email_body(formatted_workout):
+def format_email_body(formatted_workout):
     # get todays date & format it
     now = datetime.datetime.now()
     # TODO - fix days like "02nd" -> 2nd
@@ -154,18 +165,17 @@ def save_email_body(formatted_workout):
         date_end = "th"
     date_str = now.strftime('7MA: %A, %B %d') + date_end
 
-    # save the email body to a file
-    email_body_file=open(EMAIL_BODY_FILENAME,'w')
-    email_body_file.write(formatted_workout)
-    email_body_file.close()
-
-    return date_str
+    return [date_str, formatted_workout]
 
 
-def send_emails(email_list, subject):
+def send_emails(email_list, subject, body):
     for email in email_list:
         # call the sender script
-        os.system('cat ./' + EMAIL_BODY_FILENAME + ' | mutt -s "' + subject + '" ' + email)
+        if DEBUGGER:
+            print("Sending email to: " + email)
+            print("\twith subject: " + subject)
+            print("\twith body file: " + body)
+        send_email(email, subject, body)
 
 
 def main():
@@ -179,9 +189,9 @@ def main():
 
     formatted_list = format_email_list(exercise_list, total_time)
 
-    subj = save_email_body(formatted_list)
+    [subj, body] = format_email_body(formatted_list)
 
-    send_emails(email_list, subj)
+    send_emails(email_list, subj, body)
     return 0
 
 main()

@@ -1,11 +1,32 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import os
+import json
 
-SENDER_ADDRESS = ""
-SENDER_PASS = ''
+# if email is blocker - go to this URL and enable less secure app access
+# https://myaccount.google.com/lesssecureapps   
 
-def send_email(recipient, subj = "email from elliot", body = "error with sending email, sorry about that :("):
+def send_email(recipient, subj, body):
+    SENDER_ADDRESS = ""
+    SENDER_PASS = ""
+    # load the email and pw from json file
+    cred_file_path = "./email_creds.json"
+    cred_file_exists = os.path.isfile(cred_file_path)
+    if cred_file_exists:
+        with open("./email_creds.json") as cred_file:
+            parsed_creds = (json.load(cred_file))
+            try:
+                SENDER_ADDRESS = parsed_creds['email']
+                SENDER_PASS = parsed_creds['password']
+            except:
+                print("Creds file does not contain address or password.")
+    else: 
+        # TODO create blank email cred file - maybe prompt the user for the email and pw to write to the new file
+        # return w/ error
+        print("No email credentials file")
+        return 0
+
     mail_content = body
     #The mail addresses and password
     sender_address = SENDER_ADDRESS
